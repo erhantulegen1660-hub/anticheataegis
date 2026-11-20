@@ -1,6 +1,6 @@
 package dev.sentinel.listener;
 
-import com.github.retrooper.packetevents.event.PacketListenerAbstract;
+import com.github.retrooper.packetevents.event.PacketListener;
 import com.github.retrooper.packetevents.event.PacketReceiveEvent;
 import com.github.retrooper.packetevents.event.PacketSendEvent;
 import com.github.retrooper.packetevents.event.UserDisconnectEvent;
@@ -14,7 +14,7 @@ import dev.sentinel.data.PlayerData;
 import java.util.logging.Level;
 
 /** Единая точка входа пакетов: ping/pong, учёт игроков и рассылка пакетов в проверки. */
-public final class ACPacketListener extends PacketListenerAbstract {
+public final class ACPacketListener implements PacketListener
 
     private final AntiCheatPlugin plugin;
 
