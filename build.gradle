@@ -1,6 +1,6 @@
 plugins {
     id 'java'
-    id 'com.gradleup.shadow' version '8.3.5'
+    id 'com.gradleup.shadow' version '8.3.6'
 }
 
 group = 'dev.sentinel'
@@ -18,8 +18,7 @@ repositories {
 
 dependencies {
     compileOnly 'io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT'
-    // 2.11.x добавил поддержку 1.21.11
-    implementation 'com.github.retrooper:packetevents-spigot:2.11.2'
+    compileOnly 'com.github.retrooper:packetevents-spigot:2.11.2'
 }
 
 tasks.withType(JavaCompile).configureEach {
@@ -32,9 +31,9 @@ processResources {
 }
 
 shadowJar {
-    archiveClassifier = ''
-    relocate 'com.github.retrooper.packetevents', 'dev.sentinel.libs.packetevents.api'
-    relocate 'io.github.retrooper.packetevents', 'dev.sentinel.libs.packetevents.impl'
+    archiveClassifier.set('')
 }
 
-build.dependsOn shadowJar
+tasks.build {
+    dependsOn(tasks.shadowJar)
+}
