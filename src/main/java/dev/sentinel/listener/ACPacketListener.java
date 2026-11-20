@@ -1,69 +1,29 @@
-package dev.sentinel.listener;
+package dev.sentinel;
 
-import com.github.retrooper.packetevents.event.PacketListener;
-import com.github.retrooper.packetevents.event.PacketReceiveEvent;
-import com.github.retrooper.packetevents.event.PacketSendEvent;
-import com.github.retrooper.packetevents.event.UserDisconnectEvent;
-import com.github.retrooper.packetevents.event.UserLoginEvent;
-import com.github.retrooper.packetevents.protocol.packettype.PacketType;
-import com.github.retrooper.packetevents.wrapper.play.client.WrapperPlayClientPong;
-import dev.sentinel.AntiCheatPlugin;
-import dev.sentinel.check.Check;
-import dev.sentinel.data.PlayerData;
+import com.github.retrooper.packetevents.PacketEvents;
+import com.github.retrooper.packetevents.event.PacketListenerCommon;
+import com.github.retrooper.packetevents.event.PacketListenerPriority;
+import dev.sentinel.listener.ACPacketListener;
+import org.bukkit.plugin.java.JavaPlugin;
 
-import java.util.logging.Level;
+public final class AntiCheatPlugin extends JavaPlugin {
 
-/** Единая точка входа пакетов: ping/pong, учёт игроков и рассылка пакетов в проверки. */
-public final class ACPacketListener implements PacketListener {
+    private PacketListenerCommon packetListener;
 
-    private final AntiCheatPlugin plugin;
+    @Override
+    public void onEnable() {
+        saveDefaultConfig();
 
-    public ACPacketListener(AntiCheatPlugin plugin) {
-        this.plugin = plugin;
+        this.packetListener = PacketEvents.getAPI()
+                .getEventManager()
+                .registerListener(new ACPacketListener(this), PacketListenerPriority.LOW);
     }
 
     @Override
-    public void onUserLogin(UserLoginEvent event) {
-        plugin.dataManager().create(event.getUser());
-    }
-
-    @Override
-    public void onUserDisconnect(UserDisconnectEvent event) {
-        plugin.dataManager().remove(event.getUser().getUUID());
-    }
-
-    @Override
-    public void onPacketReceive(PacketReceiveEvent event) {
-        PlayerData data = plugin.dataManager().get(event.getUser().getUUID());
-        if (data == null) return;
-
-        if (event.getPacketType() == PacketType.Play.Client.PONG) {
-            if (data.onPong(new WrapperPlayClientPong(event).getId())) {
-                event.setCancelled(true);
-                return;
-            }
-        }
-
-        for (Check check : data.checks()) {
-            try {
-                check.onReceive(event);
-            } catch (Throwable t) {
-                plugin.getLogger().log(Level.WARNING, "Check " + check.name() + " failed on receive", t);
-            }
-        }
-    }
-
-    @Override
-    public void onPacketSend(PacketSendEvent event) {
-        PlayerData data = plugin.dataManager().get(event.getUser().getUUID());
-        if (data == null) return;
-
-        for (Check check : data.checks()) {
-            try {
-                check.onSend(event);
-            } catch (Throwable t) {
-                plugin.getLogger().log(Level.WARNING, "Check " + check.name() + " failed on send", t);
-            }
+    public void onDisable() {
+        if (packetListener != null) {
+            PacketEvents.getAPI().getEventManager().unregisterListener(packetListener);
+            packetListener = null;
         }
     }
 }
