@@ -1,0 +1,9 @@
+name: SentinelAC
+version: '${version}'
+main: dev.sentinel.AntiCheatPlugin
+api-version: '1.21.11'
+description: Async packet-based anti-cheat
+commands:
+  ac:
+    description: SentinelAC management
+    usage: /ac <alerts|operator|info|reset|reload>

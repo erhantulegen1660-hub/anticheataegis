@@ -1,0 +1,40 @@
+plugins {
+    id 'java'
+    id 'com.gradleup.shadow' version '8.3.5'
+}
+
+group = 'dev.sentinel'
+version = '1.0.0'
+
+java {
+    toolchain { languageVersion = JavaLanguageVersion.of(21) }
+}
+
+repositories {
+    mavenCentral()
+    maven { url = 'https://repo.papermc.io/repository/maven-public/' }
+    maven { url = 'https://repo.codemc.io/repository/maven-releases/' }
+}
+
+dependencies {
+    compileOnly 'io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT'
+    // 2.11.x добавил поддержку 1.21.11
+    implementation 'com.github.retrooper:packetevents-spigot:2.11.2'
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+    options.release = 21
+}
+
+processResources {
+    filesMatching('plugin.yml') { expand(version: project.version) }
+}
+
+shadowJar {
+    archiveClassifier = ''
+    relocate 'com.github.retrooper.packetevents', 'dev.sentinel.libs.packetevents.api'
+    relocate 'io.github.retrooper.packetevents', 'dev.sentinel.libs.packetevents.impl'
+}
+
+build.dependsOn shadowJar

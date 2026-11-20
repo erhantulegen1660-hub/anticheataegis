@@ -1,0 +1,53 @@
+# ---------------- Алерты ----------------
+alerts:
+  # Алерты видят ТОЛЬКО онлайн-игроки из этого списка
+  only-listed-operators: true
+  operators: ["xachyama", "assadisst"]
+  # Плейсхолдеры MiniMessage: <player> <check> <details> <vl> <ping>
+  format: "<dark_gray>[<red>AC</red>]</dark_gray> <white><player></white> <gray>—</gray> <red><check></red> <gray>(<details>)</gray> <yellow>VL <vl></yellow> <aqua><ping>ms</aqua>"
+
+# ---------------- Спад VL ----------------
+vl-decay:
+  interval-seconds: 20
+  amount: 0.5
+  # VL снижается только если за это время не было срабатываний
+  clean-seconds: 15
+
+# ---------------- Ping ----------------
+ping:
+  interval-ticks: 20
+
+# ---------------- Наказания ----------------
+punishments:
+  # Плейсхолдеры в команде: %player% %check% %vl% %ping% %details%
+  # Плейсхолдеры в kick-message (MiniMessage): <check> <vl> <ping> <details>
+  kick-message: "<red><bold>SentinelAC</bold></red><newline><gray>Вы отключены за подозрительную активность:</gray><newline><white><check></white> <dark_gray>(VL <vl>)</dark_gray>"
+  default:
+    - vl: 10
+      type: KICK
+    - vl: 25
+      type: COMMAND
+      command: "ban %player% [SentinelAC] %check% (VL %vl%)"
+  # Переопределения по отдельным проверкам (необязательно)
+  # checks.<имя>.punishments заменяет default для этой проверки
+
+checks:
+  fly:     { enabled: true }
+  speed:   { enabled: true }
+  nofall:  { enabled: true }
+  timer:   { enabled: true }
+  killaura: { enabled: true }
+  reach:
+    enabled: true
+    punishments:
+      - vl: 8
+        type: KICK
+      - vl: 20
+        type: COMMAND
+        command: "ban %player% [SentinelAC] Reach (VL %vl%) %details%"
+  autoclicker: { enabled: true }
+  scaffold: { enabled: true }
+  badpackets: { enabled: true }
+  anti-esp:
+    player-esp: { enabled: true, hide-distance: 16.0, cache-ticks: 3 }
+    chest-esp:  { enabled: true, mask-distance: 10.0 }
