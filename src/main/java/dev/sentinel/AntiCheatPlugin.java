@@ -61,9 +61,6 @@ public final class AntiCheatPlugin extends JavaPlugin {
             PacketEvents.getAPI().getEventManager().unregisterListener(packetListener);
             packetListener = null;
         }
-        if (dataManager != null) {
-            dataManager.clear();
-        }
         PacketEvents.getAPI().terminate();
     }
 
@@ -74,9 +71,6 @@ public final class AntiCheatPlugin extends JavaPlugin {
         }
         if (violations != null) {
             violations.reload();
-        }
-        if (registry != null) {
-            registry.reload();
         }
     }
 
