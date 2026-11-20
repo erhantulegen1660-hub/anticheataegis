@@ -1,6 +1,7 @@
 package dev.sentinel;
 
 import com.github.retrooper.packetevents.PacketEvents;
+import com.github.retrooper.packetevents.event.PacketListenerCommon;
 import com.github.retrooper.packetevents.event.PacketListenerPriority;
 import dev.sentinel.alert.AlertManager;
 import dev.sentinel.check.CheckRegistry;
@@ -20,7 +21,7 @@ public final class AntiCheatPlugin extends JavaPlugin {
     private AlertManager alerts;
     private ViolationManager violations;
     private PlayerDataManager dataManager;
-    private ACPacketListener packetListener;
+    private PacketListenerCommon packetListener;
 
     @Override
     public void onLoad() {
@@ -37,45 +38,65 @@ public final class AntiCheatPlugin extends JavaPlugin {
     public void onEnable() {
         saveDefaultConfig();
 
-        registry = new CheckRegistry(this);
-        alerts = new AlertManager(this);
-        violations = new ViolationManager(this);
-        dataManager = new PlayerDataManager(this);
+        this.alerts = new AlertManager(this);
+        this.violations = new ViolationManager(this);
+        this.registry = new CheckRegistry(this);
+        this.dataManager = new PlayerDataManager(this);
 
-        PluginCommand cmd = getCommand("ac");
+        this.packetListener = PacketEvents.getAPI()
+                .getEventManager()
+                .registerListener(new ACPacketListener(this), PacketListenerPriority.LOW);
+
+        PluginCommand cmd = getCommand("sentinel");
         if (cmd != null) {
-            ACCommand handler = new ACCommand(this);
-            cmd.setExecutor(handler);
-            cmd.setTabCompleter(handler);
+            ACCommand commandExecutor = new ACCommand(this);
+            cmd.setExecutor(commandExecutor);
+            cmd.setTabCompleter(commandExecutor);
         }
-
-        PacketEvents.getAPI().init();
-        packetListener = new ACPacketListener(this);
-        PacketEvents.getAPI().getEventManager().registerListener(packetListener, PacketListenerPriority.LOW);
-
-        dataManager.startTasks();
-        getLogger().info("SentinelAC enabled.");
     }
 
     @Override
     public void onDisable() {
-        if (dataManager != null) dataManager.shutdown();
-        if (PacketEvents.getAPI() != null) {
-            if (packetListener != null) PacketEvents.getAPI().getEventManager().unregisterListener(packetListener);
-            PacketEvents.getAPI().terminate();
+        if (packetListener != null) {
+            PacketEvents.getAPI().getEventManager().unregisterListener(packetListener);
+            packetListener = null;
         }
-        instance = null;
+        if (dataManager != null) {
+            dataManager.clear();
+        }
+        PacketEvents.getAPI().terminate();
     }
 
     public void reloadAll() {
         reloadConfig();
-        alerts.reload();
-        violations.reload();
+        if (alerts != null) {
+            alerts.reload();
+        }
+        if (violations != null) {
+            violations.reload();
+        }
+        if (registry != null) {
+            registry.reload();
+        }
     }
 
-    public static AntiCheatPlugin get() { return instance; }
-    public CheckRegistry registry() { return registry; }
-    public AlertManager alerts() { return alerts; }
-    public ViolationManager violations() { return violations; }
-    public PlayerDataManager dataManager() { return dataManager; }
+    public static AntiCheatPlugin get() {
+        return instance;
+    }
+
+    public CheckRegistry registry() {
+        return registry;
+    }
+
+    public AlertManager alerts() {
+        return alerts;
+    }
+
+    public ViolationManager violations() {
+        return violations;
+    }
+
+    public PlayerDataManager dataManager() {
+        return dataManager;
+    }
 }
