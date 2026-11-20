@@ -14,7 +14,7 @@ import dev.sentinel.data.PlayerData;
 import java.util.logging.Level;
 
 /** Единая точка входа пакетов: ping/pong, учёт игроков и рассылка пакетов в проверки. */
-public final class ACPacketListener implements PacketListener
+public final class ACPacketListener implements PacketListener {
 
     private final AntiCheatPlugin plugin;
 
